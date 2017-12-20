@@ -53,7 +53,8 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
     private QueueMessageTimeoutHandler timeoutHandler;  // 消息处理超时Handler
 
     private int threadsNum = 1; // 线程数量
-    private MultiThreadingStrategy threadingStrategy;
+    private MultiThreadingStrategy messageHandlerThread;    // 消息处理线程
+    private MultiThreadingStrategy messageCheckCircleThread;    // 消息检查线程
 
 
     /**
@@ -80,8 +81,10 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
     @Override
     public void startConsumer(int threads) {
         this.threadsNum = threads;
-        this.threadingStrategy = new MultiThreadingStrategy(threads);
-        this.threadingStrategy.start(queue.getQueueName(), new Runnable() {
+
+        // 消息处理
+        this.messageHandlerThread = new MultiThreadingStrategy(threads);
+        this.messageHandlerThread.start(queue.getQueueName(), new Runnable() {
             @Override
             public void run() {
                 MessageWrapper<T> wrapper = null;
@@ -103,6 +106,15 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
                 }
             }
         });
+
+        // 消息检查
+        this.messageCheckCircleThread = new MultiThreadingStrategy(1);
+        this.messageCheckCircleThread.start(queue.handlerQueue().getQueueName(), new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
     }
 
     /**
@@ -110,7 +122,8 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
      */
     @Override
     public void stopConsumer() {
-        this.threadingStrategy.stop();
+        this.messageHandlerThread.stop();
+        this.messageCheckCircleThread.stop();
     }
 
     /**
@@ -172,7 +185,7 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
     public void afterPropertiesSet() throws Exception {
 
         // 开启线程
-        if (threadingStrategy == null) {
+        if (messageHandlerThread == null) {
             startConsumer(1);
         }
     }
