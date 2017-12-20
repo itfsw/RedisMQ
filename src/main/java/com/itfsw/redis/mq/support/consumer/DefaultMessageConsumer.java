@@ -19,10 +19,14 @@ package com.itfsw.redis.mq.support.consumer;
 import com.itfsw.redis.mq.MessageConsumer;
 import com.itfsw.redis.mq.MessageListener;
 import com.itfsw.redis.mq.MessageQueue;
+import com.itfsw.redis.mq.RedisMqException;
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
+import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageExpiredHandler;
+import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageFailurHandler;
+import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageSuccessHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,6 +160,20 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (successHandler == null) {
+            successHandler = new DefaultQueueMessageSuccessHandler();
+        }
+        if (failureHandler == null) {
+            failureHandler = new DefaultQueueMessageFailurHandler();
+        }
+        if (expiredHandler == null) {
+            expiredHandler = new DefaultQueueMessageExpiredHandler();
+        }
+
+        if (messageListener == null){
+            throw new RedisMqException("没有成功注册listener");
+        }
+
         // 开启线程
         if (messageHandlerThread == null) {
             startConsumer(1);

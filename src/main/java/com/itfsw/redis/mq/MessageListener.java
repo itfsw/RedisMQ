@@ -28,8 +28,9 @@ import com.itfsw.redis.mq.model.MessageWrapper;
  */
 public interface MessageListener<T> {
     /**
-     * 接收处理消息
+     * 消息处理
      * @param messageWrapper
+     * @throws Exception
      */
-    void onMessage(MessageWrapper<T> messageWrapper);
+    void onMessage(MessageWrapper<T> messageWrapper) throws Exception;
 }
