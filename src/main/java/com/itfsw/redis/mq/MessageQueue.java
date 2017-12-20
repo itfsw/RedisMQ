@@ -35,6 +35,12 @@ public interface MessageQueue<T> {
     String getQueueName();
 
     /**
+     * 设置队列名称
+     * @return
+     */
+    void setQueueName(String queueName);
+
+    /**
      * Redis操作
      * @return
      */

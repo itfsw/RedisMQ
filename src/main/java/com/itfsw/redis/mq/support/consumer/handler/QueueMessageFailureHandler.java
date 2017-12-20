@@ -18,11 +18,12 @@ package com.itfsw.redis.mq.support.consumer.handler;
 
 /**
  * ---------------------------------------------------------------------------
- * 消息处理成功
+ * 消息处理失败
  * ---------------------------------------------------------------------------
  * @author: hewei
  * @time:2017/11/17 22:35
  * ---------------------------------------------------------------------------
  */
-public interface QueueMessageFailureHandler {
+public abstract class QueueMessageFailureHandler implements QueueMessageHandler {
+
 }

@@ -16,6 +16,11 @@
 
 package com.itfsw.redis.mq;
 
+import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
+import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
+import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
+import com.itfsw.redis.mq.support.consumer.handler.QueueMessageTimeoutHandler;
+
 /**
  * ---------------------------------------------------------------------------
  * 消费者
@@ -30,4 +35,45 @@ public interface MessageConsumer<T> {
      * @return
      */
     MessageQueue<T> getQueue();
+
+    /**
+     * 设置监听器
+     * @param listener
+     */
+    void setMessageListener(MessageListener<T> listener);
+
+    /**
+     * 开启consumer
+     * @param threads
+     */
+    void startConsumer(int threads);
+
+    /**
+     * 结束consumer
+     */
+    void stopConsumer();
+
+    /**
+     * 设置成功handler
+     * @param successHandler
+     */
+    void setSuccessHandler(QueueMessageSuccessHandler successHandler);
+
+    /**
+     * 设置失败handler
+     * @param failureHandler
+     */
+    void setFailureHandler(QueueMessageFailureHandler failureHandler);
+
+    /**
+     * 设置过期handler
+     * @param expiredHandler
+     */
+    void setExpiredHandler(QueueMessageExpiredHandler expiredHandler);
+
+    /**
+     * 设置超时handler
+     * @param timeoutHandler
+     */
+    void setTimeoutHandler(QueueMessageTimeoutHandler timeoutHandler);
 }

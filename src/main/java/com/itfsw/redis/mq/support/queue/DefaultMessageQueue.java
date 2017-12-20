@@ -45,6 +45,7 @@ public class DefaultMessageQueue<T> implements MessageQueue<T> {
      * @param queueName value to be assigned to property queueName
      * @author hewei
      */
+    @Override
     public void setQueueName(String queueName) {
         this.queueName = queueName;
     }

@@ -29,7 +29,7 @@ import com.itfsw.redis.mq.model.MessageWrapper;
 public interface MessageListener<T> {
     /**
      * 接收处理消息
-     * @param message
+     * @param messageWrapper
      */
-    void onMessage(MessageWrapper<T> message);
+    void onMessage(MessageWrapper<T> messageWrapper);
 }

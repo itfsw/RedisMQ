@@ -18,12 +18,12 @@ package com.itfsw.redis.mq.redis;
 
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.redis.serializer.KeySerializer;
-import com.itfsw.redis.mq.redis.serializer.KryoRedisSerializer;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.Assert;
 
@@ -139,7 +139,7 @@ public class RedisOperations implements InitializingBean {
         }
 
         if (this.valueSerializer == null) {
-            this.valueSerializer = new KryoRedisSerializer();
+            this.valueSerializer = new GenericJackson2JsonRedisSerializer();
         }
 
         // redisTemplate

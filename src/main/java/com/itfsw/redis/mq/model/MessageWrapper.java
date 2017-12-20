@@ -27,6 +27,7 @@ package com.itfsw.redis.mq.model;
 public class MessageWrapper<T> {
     private String messageId;   // 消息ID
     private Long createTime;    // 创建日期
+    private Long excuteTime;    // 执行时间
     private Long expires;   // 有效期
     private Boolean highPriority;   // 高优先级
     private T message; // 消息
@@ -119,5 +120,23 @@ public class MessageWrapper<T> {
      */
     public void setMessage(T message) {
         this.message = message;
+    }
+
+    /**
+     * Getter method for property <tt>excuteTime</tt>.
+     * @return property value of excuteTime
+     * @author hewei
+     */
+    public Long getExcuteTime() {
+        return excuteTime;
+    }
+
+    /**
+     * Setter method for property <tt>excuteTime</tt>.
+     * @param excuteTime value to be assigned to property excuteTime
+     * @author hewei
+     */
+    public void setExcuteTime(Long excuteTime) {
+        this.excuteTime = excuteTime;
     }
 }

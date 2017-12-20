@@ -24,5 +24,5 @@ package com.itfsw.redis.mq.support.consumer.handler;
  * @time:2017/11/17 22:35
  * ---------------------------------------------------------------------------
  */
-public interface QueueMessageTimeoutHandler {
+public interface QueueMessageTimeoutHandler extends QueueMessageHandler {
 }
