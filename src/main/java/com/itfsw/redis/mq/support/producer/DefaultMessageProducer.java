@@ -23,7 +23,6 @@ import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.redis.RedisOperations;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 
@@ -36,7 +35,6 @@ import java.text.SimpleDateFormat;
  * ---------------------------------------------------------------------------
  */
 public class DefaultMessageProducer<T> implements MessageProducer<T>, InitializingBean, DisposableBean {
-    @Autowired
     private MessageQueue<T> queue;  // 消息队列
     private IdWorker idWorker;  // id 生成器
 
