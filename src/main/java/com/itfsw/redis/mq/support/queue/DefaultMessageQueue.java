@@ -19,7 +19,6 @@ package com.itfsw.redis.mq.support.queue;
 import com.itfsw.redis.mq.MessageQueue;
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.redis.RedisOperations;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ---------------------------------------------------------------------------
@@ -29,10 +28,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @time:2017/11/17 16:12
  * ---------------------------------------------------------------------------
  */
-public class DefaultMessageQueue<T> implements MessageQueue<T>, InitializingBean{
+public class DefaultMessageQueue<T> implements MessageQueue<T> {
     private RedisOperations redisOps;   // Redis 操作对象
     private String queueName = "default";   // 队列名称
-    private MessageQueue handlerQueue;  // 处理队列
 
     /**
      * 构造函数
@@ -52,7 +50,6 @@ public class DefaultMessageQueue<T> implements MessageQueue<T>, InitializingBean
         this.queueName = queueName;
     }
 
-
     /**
      * Getter method for property <tt>queueName</tt>.
      * @return property value of queueName
@@ -61,11 +58,6 @@ public class DefaultMessageQueue<T> implements MessageQueue<T>, InitializingBean
     @Override
     public String getQueueName() {
         return queueName;
-    }
-
-    @Override
-    public MessageQueue<T> handlerQueue() {
-        return handlerQueue;
     }
 
     @Override
@@ -89,24 +81,8 @@ public class DefaultMessageQueue<T> implements MessageQueue<T>, InitializingBean
     }
 
     @Override
-    public MessageWrapper<T> pollTo(MessageQueue<T> queue) {
-        if (queue.redisOps().equals(redisOps)) {
-            return redisOps.opsForList().rightPopAndLeftPush(queueName, queue.getQueueName());
-        } else {
-            MessageWrapper<T> message = redisOps.opsForList().rightPop(queueName);
-            queue.add(message);
-            return message;
-        }
-    }
-
-    @Override
     public long size() {
         return redisOps.opsForList().size(queueName);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        handlerQueue = new DefaultMessageQueue(redisOps);
-        handlerQueue.setQueueName(queueName + "-handler");
-    }
 }

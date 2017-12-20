@@ -19,7 +19,6 @@ package com.itfsw.redis.mq;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
-import com.itfsw.redis.mq.support.consumer.handler.QueueMessageTimeoutHandler;
 
 /**
  * ---------------------------------------------------------------------------
@@ -71,9 +70,4 @@ public interface MessageConsumer<T> {
      */
     void setExpiredHandler(QueueMessageExpiredHandler expiredHandler);
 
-    /**
-     * 设置超时handler
-     * @param timeoutHandler
-     */
-    void setTimeoutHandler(QueueMessageTimeoutHandler timeoutHandler);
 }

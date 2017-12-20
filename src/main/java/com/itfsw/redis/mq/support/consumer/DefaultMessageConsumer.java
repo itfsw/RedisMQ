@@ -23,7 +23,6 @@ import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
-import com.itfsw.redis.mq.support.consumer.handler.QueueMessageTimeoutHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +49,9 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
     private QueueMessageSuccessHandler successHandler;    // 处理成功Handler
     private QueueMessageFailureHandler failureHandler;    // 处理失败Handler
     private QueueMessageExpiredHandler expiredHandler;  // 消息过期处理Handler
-    private QueueMessageTimeoutHandler timeoutHandler;  // 消息处理超时Handler
 
     private int threadsNum = 1; // 线程数量
     private MultiThreadingStrategy messageHandlerThread;    // 消息处理线程
-    private MultiThreadingStrategy messageCheckCircleThread;    // 消息检查线程
 
 
     /**
@@ -84,35 +81,22 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
 
         // 消息处理
         this.messageHandlerThread = new MultiThreadingStrategy(threads);
-        this.messageHandlerThread.start(queue.getQueueName(), new Runnable() {
-            @Override
-            public void run() {
-                MessageWrapper<T> wrapper = null;
-                try {
-                    wrapper = queue.pollTo(queue.handlerQueue());
-                    long time = queue.redisOps().time();
-                    wrapper.setExcuteTime(time);
-                    // 1. 判断过期
-                    if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
-                        expiredHandler.onMessage(queue, wrapper);
-                    } else {
-                        // 2. 执行
-                        messageListener.onMessage(wrapper);
-                        // 3. 执行成功
-                        successHandler.onMessage(queue, wrapper);
-                    }
-                } catch (Throwable e) {
-                    failureHandler.onMessage(queue, wrapper, e);
+        this.messageHandlerThread.start(queue.getQueueName(), () -> {
+            MessageWrapper<T> wrapper = null;
+            try {
+                wrapper = queue.poll();
+                long time = queue.redisOps().time();
+                // 1. 判断过期
+                if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
+                    expiredHandler.onMessage(queue, wrapper);
+                } else {
+                    // 2. 执行
+                    messageListener.onMessage(wrapper);
+                    // 3. 执行成功
+                    successHandler.onMessage(queue, wrapper);
                 }
-            }
-        });
-
-        // 消息检查
-        this.messageCheckCircleThread = new MultiThreadingStrategy(1);
-        this.messageCheckCircleThread.start(queue.handlerQueue().getQueueName(), new Runnable() {
-            @Override
-            public void run() {
-
+            } catch (Throwable e) {
+                failureHandler.onMessage(queue, wrapper, e);
             }
         });
     }
@@ -123,7 +107,6 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
     @Override
     public void stopConsumer() {
         this.messageHandlerThread.stop();
-        this.messageCheckCircleThread.stop();
     }
 
     /**
@@ -166,16 +149,6 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
         this.expiredHandler = expiredHandler;
     }
 
-    /**
-     * Setter method for property <tt>timeoutHandler</tt>.
-     * @param timeoutHandler value to be assigned to property timeoutHandler
-     * @author hewei
-     */
-    @Override
-    public void setTimeoutHandler(QueueMessageTimeoutHandler timeoutHandler) {
-        this.timeoutHandler = timeoutHandler;
-    }
-
     @Override
     public void destroy() throws Exception {
         stopConsumer();
@@ -183,7 +156,6 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
         // 开启线程
         if (messageHandlerThread == null) {
             startConsumer(1);

@@ -26,13 +26,6 @@ package com.itfsw.redis.mq;
  */
 public interface MessageSender<T> {
     /**
-     * 消息ID
-     * @param messageId
-     * @return
-     */
-    MessageSender<T> withMessageId(String messageId);
-
-    /**
      * 消息过期时间
      * @param timeToLive
      * @return

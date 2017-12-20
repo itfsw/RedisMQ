@@ -35,12 +35,6 @@ public interface MessageQueue<T> {
     String getQueueName();
 
     /**
-     * 获取处理队列
-     * @return
-     */
-    MessageQueue<T> handlerQueue();
-
-    /**
      * 设置队列名称
      * @return
      */
@@ -69,13 +63,6 @@ public interface MessageQueue<T> {
      * @return
      */
     MessageWrapper<T> poll();
-
-    /**
-     * 删除返回队列元素（并把元素加入新队列）
-     * @param queue
-     * @return
-     */
-    MessageWrapper<T> pollTo(MessageQueue<T> queue);
 
     /**
      * 消息队列大小
