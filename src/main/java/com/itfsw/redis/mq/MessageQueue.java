@@ -35,6 +35,12 @@ public interface MessageQueue<T> {
     String getQueueName();
 
     /**
+     * 获取处理队列
+     * @return
+     */
+    MessageQueue<T> handlerQueue();
+
+    /**
      * 设置队列名称
      * @return
      */

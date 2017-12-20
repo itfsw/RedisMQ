@@ -19,6 +19,7 @@ package com.itfsw.redis.mq.support.queue;
 import com.itfsw.redis.mq.MessageQueue;
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.redis.RedisOperations;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ---------------------------------------------------------------------------
@@ -28,9 +29,10 @@ import com.itfsw.redis.mq.redis.RedisOperations;
  * @time:2017/11/17 16:12
  * ---------------------------------------------------------------------------
  */
-public class DefaultMessageQueue<T> implements MessageQueue<T> {
+public class DefaultMessageQueue<T> implements MessageQueue<T>, InitializingBean{
     private RedisOperations redisOps;   // Redis 操作对象
     private String queueName = "default";   // 队列名称
+    private MessageQueue handlerQueue;  // 处理队列
 
     /**
      * 构造函数
@@ -59,6 +61,11 @@ public class DefaultMessageQueue<T> implements MessageQueue<T> {
     @Override
     public String getQueueName() {
         return queueName;
+    }
+
+    @Override
+    public MessageQueue<T> handlerQueue() {
+        return handlerQueue;
     }
 
     @Override
@@ -95,5 +102,11 @@ public class DefaultMessageQueue<T> implements MessageQueue<T> {
     @Override
     public long size() {
         return redisOps.opsForList().size(queueName);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        handlerQueue = new DefaultMessageQueue(redisOps);
+        handlerQueue.setQueueName(queueName + "-handler");
     }
 }

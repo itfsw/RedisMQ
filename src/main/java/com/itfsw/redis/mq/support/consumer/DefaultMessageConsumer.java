@@ -25,7 +25,6 @@ import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageTimeoutHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
-import com.itfsw.redis.mq.support.queue.DefaultMessageQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -46,7 +45,6 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
 
     @Autowired
     private MessageQueue<T> queue;  // 消息队列
-    private MessageQueue<T> handlerQueue;   // 正在处理的队列
     private MessageListener<T> messageListener; // 消息处理
 
     private QueueMessageSuccessHandler successHandler;    // 处理成功Handler
@@ -64,8 +62,6 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
      */
     public DefaultMessageConsumer(MessageQueue<T> queue) {
         this.queue = queue;
-        this.handlerQueue = new DefaultMessageQueue<>(queue.redisOps());
-        this.handlerQueue.setQueueName(queue.getQueueName() + "-handler");
     }
 
     /**
@@ -90,7 +86,7 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
             public void run() {
                 MessageWrapper<T> wrapper = null;
                 try {
-                    wrapper = queue.pollTo(handlerQueue);
+                    wrapper = queue.pollTo(queue.handlerQueue());
                     long time = queue.redisOps().time();
                     wrapper.setExcuteTime(time);
                     // 1. 判断过期
@@ -99,9 +95,11 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
                     } else {
                         // 2. 执行
                         messageListener.onMessage(wrapper);
+                        // 3. 执行成功
+                        successHandler.onMessage(queue, wrapper);
                     }
                 } catch (Throwable e) {
-                    failureHandler.onMessage(queue, wrapper);
+                    failureHandler.onMessage(queue, wrapper, e);
                 }
             }
         });

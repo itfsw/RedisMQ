@@ -16,6 +16,9 @@
 
 package com.itfsw.redis.mq.support.consumer.handler;
 
+import com.itfsw.redis.mq.MessageQueue;
+import com.itfsw.redis.mq.model.MessageWrapper;
+
 /**
  * ---------------------------------------------------------------------------
  * 消息处理成功
@@ -24,5 +27,11 @@ package com.itfsw.redis.mq.support.consumer.handler;
  * @time:2017/11/17 22:35
  * ---------------------------------------------------------------------------
  */
-public interface QueueMessageTimeoutHandler extends QueueMessageHandler {
+public interface QueueMessageTimeoutHandler<T> {
+    /**
+     * 接收处理消息
+     * @param messageQueue
+     * @param messageWrapper
+     */
+    void onMessage(MessageQueue<T> messageQueue, MessageWrapper<T> messageWrapper);
 }

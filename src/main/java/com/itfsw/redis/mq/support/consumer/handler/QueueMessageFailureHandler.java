@@ -16,6 +16,9 @@
 
 package com.itfsw.redis.mq.support.consumer.handler;
 
+import com.itfsw.redis.mq.MessageQueue;
+import com.itfsw.redis.mq.model.MessageWrapper;
+
 /**
  * ---------------------------------------------------------------------------
  * 消息处理失败
@@ -24,6 +27,12 @@ package com.itfsw.redis.mq.support.consumer.handler;
  * @time:2017/11/17 22:35
  * ---------------------------------------------------------------------------
  */
-public abstract class QueueMessageFailureHandler implements QueueMessageHandler {
-
+public interface QueueMessageFailureHandler<T> {
+    /**
+     * 接收处理消息
+     * @param messageQueue
+     * @param messageWrapper
+     * @param e
+     */
+    void onMessage(MessageQueue<T> messageQueue, MessageWrapper<T> messageWrapper, Throwable e);
 }
