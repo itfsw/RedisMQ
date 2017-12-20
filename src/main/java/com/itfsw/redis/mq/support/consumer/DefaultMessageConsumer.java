@@ -25,7 +25,7 @@ import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageExpiredHandler;
-import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageFailurHandler;
+import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageSuccessHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
 import org.slf4j.Logger;
@@ -89,15 +89,17 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
             MessageWrapper<T> wrapper = null;
             try {
                 wrapper = queue.poll();
-                long time = queue.redisOps().time();
-                // 1. 判断过期
-                if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
-                    expiredHandler.onMessage(queue, wrapper);
-                } else {
-                    // 2. 执行
-                    messageListener.onMessage(wrapper);
-                    // 3. 执行成功
-                    successHandler.onMessage(queue, wrapper);
+                if (wrapper != null) {
+                    long time = queue.redisOps().time();
+                    // 1. 判断过期
+                    if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
+                        expiredHandler.onMessage(queue, wrapper);
+                    } else {
+                        // 2. 执行
+                        messageListener.onMessage(wrapper);
+                        // 3. 执行成功
+                        successHandler.onMessage(queue, wrapper);
+                    }
                 }
             } catch (Throwable e) {
                 failureHandler.onMessage(queue, wrapper, e);
@@ -164,13 +166,13 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
             successHandler = new DefaultQueueMessageSuccessHandler();
         }
         if (failureHandler == null) {
-            failureHandler = new DefaultQueueMessageFailurHandler();
+            failureHandler = new DefaultQueueMessageFailureHandler();
         }
         if (expiredHandler == null) {
             expiredHandler = new DefaultQueueMessageExpiredHandler();
         }
 
-        if (messageListener == null){
+        if (messageListener == null) {
             throw new RedisMqException("没有成功注册listener");
         }
 
