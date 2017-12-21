@@ -19,7 +19,7 @@ package com.itfsw.redis.mq.support.consumer;
 import com.itfsw.redis.mq.MessageConsumer;
 import com.itfsw.redis.mq.MessageListener;
 import com.itfsw.redis.mq.MessageQueue;
-import com.itfsw.redis.mq.RedisMqException;
+import com.itfsw.redis.mq.exception.NotFoundListenerException;
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
@@ -171,7 +171,7 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T>, Initializi
         }
 
         if (messageListener == null) {
-            throw new RedisMqException("没有成功注册listener");
+            throw new NotFoundListenerException("can not found a message listener");
         }
 
         // 开启线程

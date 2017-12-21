@@ -1,4 +1,4 @@
-package com.itfsw.redis.mq;
+package com.itfsw.redis.mq.exception;
 
 /**
  * ---------------------------------------------------------------------------
