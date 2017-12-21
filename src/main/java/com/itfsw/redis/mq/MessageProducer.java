@@ -28,8 +28,9 @@ public interface MessageProducer<T> {
     /**
      * 发送消息
      * @param message
+     * @return 消息Id
      */
-    void send(T message);
+    String send(T message);
 
     /**
      * 创建消息发送器

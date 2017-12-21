@@ -41,6 +41,7 @@ public interface MessageSender<T> {
 
     /**
      * 发送
+     * @return 消息Id
      */
-    void send();
+    String send();
 }

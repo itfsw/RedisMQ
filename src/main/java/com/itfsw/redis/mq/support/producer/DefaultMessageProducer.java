@@ -47,8 +47,8 @@ public class DefaultMessageProducer<T> implements MessageProducer<T>, Initializi
     }
 
     @Override
-    public void send(T message) {
-        new DefaultMessageSender<>(message).send();
+    public String send(T message) {
+        return new DefaultMessageSender<>(message).send();
     }
 
     @Override
@@ -106,10 +106,11 @@ public class DefaultMessageProducer<T> implements MessageProducer<T>, Initializi
         }
 
         @Override
-        public void send() {
+        public String send() {
             MessageWrapper<T> messageWrapper = new MessageWrapper<>();
+            String messageId = idWorker.nextId();
             messageWrapper.setMessage(message);
-            messageWrapper.setMessageId(idWorker.nextId());
+            messageWrapper.setMessageId(messageId);
             messageWrapper.setExpires(expires < 0 ? -1 : expires);
             messageWrapper.setHighPriority(highPriority);
             messageWrapper.setCreateTime(queue.redisOps().time());
@@ -118,6 +119,7 @@ public class DefaultMessageProducer<T> implements MessageProducer<T>, Initializi
             } else {
                 queue.add(messageWrapper);
             }
+            return messageId;
         }
     }
 
