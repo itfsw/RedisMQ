@@ -16,9 +16,12 @@
 
 package com.itfsw.redis.mq.support.publisher;
 
+import com.itfsw.redis.mq.MessageChannel;
 import com.itfsw.redis.mq.MessagePublisher;
 import com.itfsw.redis.mq.MessageSender;
-import org.springframework.data.redis.core.RedisTemplate;
+import com.itfsw.redis.mq.model.MessageWrapper;
+import com.itfsw.redis.mq.support.sender.AbstractMessageSender;
+import com.itfsw.redis.mq.support.sender.RedisBasedIdWorker;
 
 /**
  * ---------------------------------------------------------------------------
@@ -28,16 +31,46 @@ import org.springframework.data.redis.core.RedisTemplate;
  * @time:2017/11/15 16:45
  * ---------------------------------------------------------------------------
  */
-public class DefaultMessagePublisher<T> implements MessagePublisher {
-    private RedisTemplate template;
+public class DefaultMessagePublisher<T> implements MessagePublisher<T> {
+    private MessageChannel<T> channel;  // 频道
+    private RedisBasedIdWorker idWorker;    // id生成器
 
-    @Override
-    public void send(Object message) {
-        template.convertAndSend("ss", message);
+    /**
+     * 构造函数
+     * @param channel
+     */
+    public DefaultMessagePublisher(MessageChannel<T> channel) {
+        this.channel = channel;
     }
 
     @Override
-    public MessageSender create(Object message) {
-        return null;
+    public String send(T message) {
+        return new DefaultMessageSender<T>(idWorker).withMessage(message).send();
+    }
+
+    @Override
+    public MessageSender<T> create(T message) {
+        return new DefaultMessageSender<T>(idWorker).withMessage(message);
+    }
+
+    @Override
+    public MessageChannel<T> getChannel() {
+        return channel;
+    }
+
+    private class DefaultMessageSender<T> extends AbstractMessageSender<T> {
+
+        /**
+         * 构造函数
+         * @param idWorker
+         */
+        public DefaultMessageSender(RedisBasedIdWorker idWorker) {
+            super(idWorker);
+        }
+
+        @Override
+        public void send(MessageWrapper<T> messageWrapper) {
+            channel.redisOps().convertAndSend(channel.getChannel(), messageWrapper);
+        }
     }
 }

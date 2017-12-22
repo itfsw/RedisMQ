@@ -16,6 +16,8 @@
 
 package com.itfsw.redis.mq;
 
+import com.itfsw.redis.mq.redis.RedisOperations;
+
 /**
  * ---------------------------------------------------------------------------
  *
@@ -24,5 +26,16 @@ package com.itfsw.redis.mq;
  * @time:2017/11/16 10:53
  * ---------------------------------------------------------------------------
  */
-public interface MessageChannel {
+public interface MessageChannel<T> {
+    /**
+     * 频道
+     * @return
+     */
+    String getChannel();
+
+    /**
+     * Redis操作
+     * @return
+     */
+    RedisOperations redisOps();
 }

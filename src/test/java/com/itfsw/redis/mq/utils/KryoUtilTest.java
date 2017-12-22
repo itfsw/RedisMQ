@@ -41,6 +41,7 @@ public class KryoUtilTest extends SpringTest {
 
     @Test
     public void test(){
+
         container.addMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message, byte[] pattern) {

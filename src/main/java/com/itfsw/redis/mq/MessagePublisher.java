@@ -28,8 +28,9 @@ public interface MessagePublisher<T> {
     /**
      * 发送消息
      * @param message
+     * @return 消息Id
      */
-    void send(T message);
+    String send(T message);
 
     /**
      * 创建消息发送器
@@ -37,4 +38,10 @@ public interface MessagePublisher<T> {
      * @return
      */
     MessageSender<T> create(T message);
+
+    /**
+     * 获取频道
+     * @return
+     */
+    MessageChannel<T> getChannel();
 }
