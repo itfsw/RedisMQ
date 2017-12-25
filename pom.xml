@@ -3,7 +3,7 @@
 
     <groupId>com.itfsw</groupId>
     <artifactId>RedisMQ</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -180,7 +180,7 @@
         <connection>scm:git:https://github.com/itfsw/RedisMQ.git</connection>
         <developerConnection>scm:git:https://github.com/itfsw/RedisMQ.git</developerConnection>
         <url>https://github.com/itfsw/RedisMQ</url>
-        <tag>V0.0.2</tag>
+        <tag>V0.0.3</tag>
     </scm>
 
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++distribution++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
