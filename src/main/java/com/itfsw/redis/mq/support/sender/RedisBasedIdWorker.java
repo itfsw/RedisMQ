@@ -44,6 +44,7 @@ public class RedisBasedIdWorker {
      */
     public synchronized static RedisBasedIdWorker regIdWorker(RedisOperations redisOps) {
         RedisBasedIdWorker worker = new RedisBasedIdWorker();
+        worker.redisOps = redisOps;
         worker.workerId = redisOps.getRedisTemplate().opsForList().leftPush("id-workers", true);
         return worker;
     }

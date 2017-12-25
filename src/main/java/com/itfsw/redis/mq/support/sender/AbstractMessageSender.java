@@ -63,6 +63,7 @@ public abstract class AbstractMessageSender<T> implements MessageSender<T> {
         messageWrapper.setExpires(expires < 0 ? -1 : expires);
         messageWrapper.setHighPriority(highPriority);
         messageWrapper.setCreateTime(idWorker.time());
+        send(messageWrapper);
         return messageId;
     }
 }
