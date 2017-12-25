@@ -8,7 +8,7 @@ package com.itfsw.redis.mq.exception;
  * @time:2017/12/20 11:17
  * ---------------------------------------------------------------------------
  */
-public class RedisMqException extends RuntimeException {
+public class RedisMqException extends Exception {
     public RedisMqException() {
     }
 

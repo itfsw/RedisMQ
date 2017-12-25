@@ -17,6 +17,7 @@
 package com.itfsw.redis.mq.support.consumer.handler;
 
 import com.itfsw.redis.mq.MessageQueue;
+import com.itfsw.redis.mq.exception.MessageHandlerException;
 import com.itfsw.redis.mq.model.MessageWrapper;
 
 /**
@@ -29,10 +30,18 @@ import com.itfsw.redis.mq.model.MessageWrapper;
  */
 public interface QueueMessageFailureHandler<T> {
     /**
-     * 接收处理消息
-     * @param messageQueue
+     * 异常处理（消息处理异常）
+     * @param queue
      * @param messageWrapper
      * @param e
      */
-    void onMessage(MessageQueue<T> messageQueue, MessageWrapper<T> messageWrapper, Throwable e);
+    void onMessageHandlerException(MessageQueue<T> queue, MessageWrapper<T> messageWrapper, MessageHandlerException e);
+
+    /**
+     * 异常处理（一些未定义的运行时异常）
+     * @param queue
+     * @param wrapper
+     * @param e
+     */
+    void onMessageProgressException(MessageQueue<T> queue, MessageWrapper<T> wrapper, Throwable e);
 }

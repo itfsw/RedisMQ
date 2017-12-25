@@ -19,6 +19,7 @@ package com.itfsw.redis.mq.support.consumer;
 import com.itfsw.redis.mq.MessageConsumer;
 import com.itfsw.redis.mq.MessageListener;
 import com.itfsw.redis.mq.MessageQueue;
+import com.itfsw.redis.mq.exception.MessageHandlerException;
 import com.itfsw.redis.mq.exception.NotFoundListenerException;
 import com.itfsw.redis.mq.model.MessageWrapper;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
@@ -97,8 +98,10 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
                         successHandler.onMessage(queue, wrapper);
                     }
                 }
-            } catch (Throwable e) {
-                failureHandler.onMessage(queue, wrapper, e);
+            } catch (MessageHandlerException e) {
+                failureHandler.onMessageHandlerException(queue, wrapper, e);
+            } catch (Throwable e){
+                failureHandler.onMessageProgressException(queue, wrapper, e);
             }
         });
     }

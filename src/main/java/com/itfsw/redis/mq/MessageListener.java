@@ -16,6 +16,7 @@
 
 package com.itfsw.redis.mq;
 
+import com.itfsw.redis.mq.exception.MessageHandlerException;
 import com.itfsw.redis.mq.model.MessageWrapper;
 
 /**
@@ -32,5 +33,5 @@ public interface MessageListener<T> {
      * @param messageWrapper
      * @throws Exception
      */
-    void onMessage(MessageWrapper<T> messageWrapper) throws Exception;
+    void onMessage(MessageWrapper<T> messageWrapper) throws MessageHandlerException;
 }
