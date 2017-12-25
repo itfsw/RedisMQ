@@ -30,8 +30,6 @@ import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageSuccessHa
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 
 /**
@@ -42,7 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @time:2017/11/20 13:26
  * ---------------------------------------------------------------------------
  */
-public class DefaultMessageConsumer<T> implements MessageConsumer<T>, InitializingBean, DisposableBean {
+public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
     private static final Logger log = LoggerFactory.getLogger(MultiThreadingStrategy.class);
 
     private MessageQueue<T> queue;  // 消息队列

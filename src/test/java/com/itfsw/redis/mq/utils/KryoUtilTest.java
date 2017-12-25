@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
 /**
@@ -56,8 +57,15 @@ public class KryoUtilTest extends SpringTest {
             }
         }, new ChannelTopic("c1"));
 
+        container.addMessageListener(new MessageListener() {
+            @Override
+            public void onMessage(Message message, byte[] pattern) {
+                System.out.println("DG" + new String(message.getBody()));
+            }
+        }, new PatternTopic("c1*"));
+
         for (int i = 0 ; i< 100; i++){
-            redisOperations.convertAndSend("c1", "消息" +i);
+            redisOperations.convertAndSend("c1:test:1", "消息" +i);
         }
     }
 }

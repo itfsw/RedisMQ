@@ -19,6 +19,8 @@ package com.itfsw.redis.mq;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.List;
+
 /**
  * ---------------------------------------------------------------------------
  * Subscriber
@@ -28,4 +30,16 @@ import org.springframework.beans.factory.InitializingBean;
  * ---------------------------------------------------------------------------
  */
 public interface MessageSubscriber<T> extends InitializingBean, DisposableBean{
+    /**
+     * 订阅的频道
+     * @return
+     */
+    List<MessageChannel> getChannels();
+
+    /**
+     * 添加监听
+     * @param listener
+     * @param channel
+     */
+    void addMessageListener(MessageListener<T> listener, MessageChannel channel);
 }

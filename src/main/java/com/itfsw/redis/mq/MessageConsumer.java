@@ -19,6 +19,8 @@ package com.itfsw.redis.mq;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageExpiredHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ---------------------------------------------------------------------------
@@ -28,7 +30,7 @@ import com.itfsw.redis.mq.support.consumer.handler.QueueMessageSuccessHandler;
  * @time:2017/11/13 10:53
  * ---------------------------------------------------------------------------
  */
-public interface MessageConsumer<T> {
+public interface MessageConsumer<T> extends InitializingBean, DisposableBean{
     /**
      * 获取队列
      * @return
