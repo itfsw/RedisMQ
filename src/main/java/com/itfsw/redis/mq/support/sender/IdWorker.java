@@ -56,7 +56,7 @@ public class IdWorker {
             sequence++;
             //判断是否溢出
             if (sequence == Long.MAX_VALUE) {
-                // 阻塞1毫秒
+                // 阻塞1毫秒(不可能进入该流程)
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
