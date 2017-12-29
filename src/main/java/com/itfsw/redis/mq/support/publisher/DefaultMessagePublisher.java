@@ -20,8 +20,8 @@ import com.itfsw.redis.mq.MessageChannel;
 import com.itfsw.redis.mq.MessagePublisher;
 import com.itfsw.redis.mq.MessageSender;
 import com.itfsw.redis.mq.model.MessageWrapper;
+import com.itfsw.redis.mq.redis.RedisOperations;
 import com.itfsw.redis.mq.support.sender.AbstractMessageSender;
-import com.itfsw.redis.mq.support.sender.RedisBasedIdWorker;
 
 /**
  * ---------------------------------------------------------------------------
@@ -33,7 +33,6 @@ import com.itfsw.redis.mq.support.sender.RedisBasedIdWorker;
  */
 public class DefaultMessagePublisher<T> implements MessagePublisher<T> {
     private MessageChannel<T> channel;  // 频道
-    private RedisBasedIdWorker idWorker;    // id生成器
 
     /**
      * 构造函数
@@ -45,12 +44,12 @@ public class DefaultMessagePublisher<T> implements MessagePublisher<T> {
 
     @Override
     public String send(T message) {
-        return new DefaultMessageSender<T>(idWorker).withMessage(message).send();
+        return new DefaultMessageSender<T>(channel.redisOps()).withMessage(message).send();
     }
 
     @Override
     public MessageSender<T> create(T message) {
-        return new DefaultMessageSender<T>(idWorker).withMessage(message);
+        return new DefaultMessageSender<T>(channel.redisOps()).withMessage(message);
     }
 
     @Override
@@ -62,10 +61,10 @@ public class DefaultMessagePublisher<T> implements MessagePublisher<T> {
 
         /**
          * 构造函数
-         * @param idWorker
+         * @param redisOps
          */
-        public DefaultMessageSender(RedisBasedIdWorker idWorker) {
-            super(idWorker);
+        public DefaultMessageSender(RedisOperations redisOps) {
+            super(redisOps);
         }
 
         @Override

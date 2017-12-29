@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.itfsw.redis.mq.utils.utils;
+package com.itfsw.redis.mq.utils;
 
+import com.itfsw.redis.mq.MessageQueue;
 import com.itfsw.redis.mq.redis.RedisOperations;
+import com.itfsw.redis.mq.support.queue.DefaultMessageQueue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -44,7 +45,7 @@ public class SpringTest {
 
     @Configuration
     @PropertySource(value = "classpath:redis.properties")
-    static class Config {
+    public static class Config {
 
         @Bean
         public RedisConnectionFactory redisConnectionFactory(@Value("${host}") String host, @Value("${port}") int port) {
@@ -60,11 +61,9 @@ public class SpringTest {
             return new RedisOperations(connectionFactory);
         }
 
-        @Bean(destroyMethod = "destroy")
-        public RedisMessageListenerContainer container(@Autowired RedisConnectionFactory connectionFactory) {
-            RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-            container.setConnectionFactory(connectionFactory);
-            return container;
+        @Bean
+        public MessageQueue messageQueue(@Autowired RedisOperations redisOperations){
+            return new DefaultMessageQueue(redisOperations);
         }
     }
 

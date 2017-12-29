@@ -20,10 +20,8 @@ import com.itfsw.redis.mq.MessageProducer;
 import com.itfsw.redis.mq.MessageQueue;
 import com.itfsw.redis.mq.MessageSender;
 import com.itfsw.redis.mq.model.MessageWrapper;
+import com.itfsw.redis.mq.redis.RedisOperations;
 import com.itfsw.redis.mq.support.sender.AbstractMessageSender;
-import com.itfsw.redis.mq.support.sender.RedisBasedIdWorker;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ---------------------------------------------------------------------------
@@ -33,9 +31,8 @@ import org.springframework.beans.factory.InitializingBean;
  * @time:2017/11/17 13:55
  * ---------------------------------------------------------------------------
  */
-public class DefaultMessageProducer<T> implements MessageProducer<T>, InitializingBean, DisposableBean {
+public class DefaultMessageProducer<T> implements MessageProducer<T> {
     private MessageQueue<T> queue;  // 消息队列
-    private RedisBasedIdWorker idWorker;  // id 生成器
 
     /**
      * 构造函数
@@ -47,31 +44,17 @@ public class DefaultMessageProducer<T> implements MessageProducer<T>, Initializi
 
     @Override
     public String send(T message) {
-        return new DefaultMessageSender<T>(idWorker).withMessage(message).send();
+        return new DefaultMessageSender<T>(queue.redisOps()).withMessage(message).send();
     }
 
     @Override
     public MessageSender<T> create(T message) {
-        return new DefaultMessageSender<T>(idWorker).withMessage(message);
+        return new DefaultMessageSender<T>(queue.redisOps()).withMessage(message);
     }
 
     @Override
     public MessageQueue<T> getQueue() {
         return queue;
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (idWorker != null) {
-            idWorker.unRegIdWorker();
-        }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if (idWorker == null) {
-            idWorker = RedisBasedIdWorker.regIdWorker(queue.redisOps());
-        }
     }
 
     /**
@@ -82,10 +65,10 @@ public class DefaultMessageProducer<T> implements MessageProducer<T>, Initializi
 
         /**
          * 构造函数
-         * @param idWorker
+         * @param redisOps
          */
-        public DefaultMessageSender(RedisBasedIdWorker idWorker) {
-            super(idWorker);
+        public DefaultMessageSender(RedisOperations redisOps) {
+            super(redisOps);
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.itfsw.redis.mq.support.sender;
 
 import com.itfsw.redis.mq.MessageSender;
 import com.itfsw.redis.mq.model.MessageWrapper;
+import com.itfsw.redis.mq.redis.RedisOperations;
 
 /**
  * ---------------------------------------------------------------------------
@@ -12,8 +13,7 @@ import com.itfsw.redis.mq.model.MessageWrapper;
  * ---------------------------------------------------------------------------
  */
 public abstract class AbstractMessageSender<T> implements MessageSender<T> {
-    private RedisBasedIdWorker idWorker;
-
+    private RedisOperations redisOps;
     private T message;  // 消息
     private long expires = -1L;   // 有效期
     private boolean highPriority = false;   // 高优先级
@@ -26,10 +26,10 @@ public abstract class AbstractMessageSender<T> implements MessageSender<T> {
 
     /**
      * 构造函数
-     * @param idWorker
+     * @param redisOps
      */
-    public AbstractMessageSender(RedisBasedIdWorker idWorker) {
-        this.idWorker = idWorker;
+    public AbstractMessageSender(RedisOperations redisOps) {
+        this.redisOps = redisOps;
     }
 
     /**
@@ -57,12 +57,14 @@ public abstract class AbstractMessageSender<T> implements MessageSender<T> {
     @Override
     public String send() {
         MessageWrapper<T> messageWrapper = new MessageWrapper<>();
-        String messageId = idWorker.nextId();
+        long time = redisOps.time();
+
+        String messageId = IdWorker.generateId(time);
         messageWrapper.setMessage(message);
         messageWrapper.setMessageId(messageId);
         messageWrapper.setExpires(expires < 0 ? -1 : expires);
         messageWrapper.setHighPriority(highPriority);
-        messageWrapper.setCreateTime(idWorker.time());
+        messageWrapper.setCreateTime(time);
         send(messageWrapper);
         return messageId;
     }
