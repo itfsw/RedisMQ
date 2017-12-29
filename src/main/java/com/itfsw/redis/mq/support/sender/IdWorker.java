@@ -1,5 +1,6 @@
 package com.itfsw.redis.mq.support.sender;
 
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Random;
 
@@ -17,34 +18,51 @@ public class IdWorker {
      */
     private static long lastTimestamp = -1L;
     /**
-     * 毫秒内序列(0~262143)
+     * 毫秒内序列
      */
     private static long sequence = 0L;
-    /**
-     * 序列在id中占的位数
-     */
-    private static final long sequenceBits = 18L;
-    /**
-     * 生成序列的掩码，这里为262143
-     */
-    private static final long sequenceMask = -1L ^ (-1L << sequenceBits);
-    private static long workerId = Math.abs((long) (new Random().nextInt()) << sequenceBits);  // worker id (冲突概率 2^31 也就是 1/2147483648)
+    private static long workerId = 0L;
+
+    static {
+        long tmp = 0L;
+        try {
+            byte[] address = InetAddress.getLocalHost().getAddress();
+            // 取前32位
+            for (int i = 0; i < 4; i++) {
+                tmp = (tmp | address[i]) << 8;
+            }
+        } catch (Throwable e) {
+        } finally {
+            workerId = Math.abs(tmp << 32 | new Random().nextInt());
+        }
+    }
 
     /**
-     * 生成Id(32位字符串)
-     * @param time
+     * 生成有序Id
+     * @param millis
      * @return
      */
-    public static synchronized String generateId(long time) {
-        long timestamp = time; //获取当前毫秒数
+    public static synchronized String generateId(long millis) {
+        long timestamp = millis; //获取当前毫秒数
+
+        //如果服务器时间有问题(时钟后退) 报错。
+        if (timestamp < lastTimestamp) {
+            throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+        }
+
         //如果上次生成时间和当前时间相同,在同一毫秒内
         if (lastTimestamp == timestamp) {
-            //sequence自增，因为sequence只有16bit，所以和sequenceMask相与一下，去掉高位
-            sequence = (sequence + 1) & sequenceMask;
-            //判断是否溢出,也就是每毫秒内超过262143，当为262143时，与sequenceMask相与，sequence就等于0，几乎不可能
-            if (sequence == 0) {
+            //sequence自增
+            sequence++;
+            //判断是否溢出
+            if (sequence == Long.MAX_VALUE) {
                 // 阻塞1毫秒
-                sleepToNextMillis();
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(String.format("Thread InterruptedException.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp), e);
+                }
+                sequence = 0;
                 timestamp++;
             }
         } else {
@@ -52,19 +70,14 @@ public class IdWorker {
         }
         lastTimestamp = timestamp;
 
-        return String.format("%s%d", new SimpleDateFormat("yyyyMMddHHmmssSSS").format(lastTimestamp), workerId | sequence);
+        return String.format("%s-%s-%s", new SimpleDateFormat("yyyyMMddHHmmssSSS").format(lastTimestamp), Long.toString(sequence, Character.MAX_RADIX), Long.toString(workerId, Character.MAX_RADIX));
     }
 
     /**
-     * 阻塞一毫秒
+     * 生成有序Id
+     * @return
      */
-    private static void sleepToNextMillis() {
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            long timestamp = System.currentTimeMillis();
-            while (timestamp == System.currentTimeMillis()) {
-            }
-        }
+    public static synchronized String nextId() {
+        return generateId(System.currentTimeMillis());
     }
 }
