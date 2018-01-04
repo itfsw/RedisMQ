@@ -1,7 +1,6 @@
 package com.itfsw.redis.mq.support.sender;
 
 import java.net.InetAddress;
-import java.text.SimpleDateFormat;
 import java.util.Random;
 
 /**
@@ -47,7 +46,8 @@ public class IdWorker {
 
         //如果服务器时间有问题(时钟后退) 报错。
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+            // 更新worker id
+            workerId = workerId >> 32 << 32 | new Random().nextInt();
         }
 
         //如果上次生成时间和当前时间相同,在同一毫秒内
@@ -70,7 +70,7 @@ public class IdWorker {
         }
         lastTimestamp = timestamp;
 
-        return String.format("%s-%s-%s", new SimpleDateFormat("yyyyMMddHHmmssSSS").format(lastTimestamp), Long.toString(sequence, Character.MAX_RADIX), Long.toString(workerId, Character.MAX_RADIX));
+        return String.format("%s-%s-%s", Long.toString(lastTimestamp, Character.MAX_RADIX), Long.toString(sequence, Character.MAX_RADIX), Long.toString(workerId, Character.MAX_RADIX));
     }
 
     /**

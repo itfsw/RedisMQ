@@ -97,6 +97,9 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
                         // 3. 执行成功
                         successHandler.onMessage(queue, wrapper);
                     }
+                } else {
+                    // 减少没有任务时cpu,redis,网络的空转消耗
+                    Thread.sleep(100);
                 }
             } catch (MessageHandlerException e) {
                 failureHandler.onMessageHandlerException(queue, wrapper, e);
