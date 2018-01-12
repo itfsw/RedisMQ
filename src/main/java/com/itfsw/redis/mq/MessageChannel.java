@@ -17,6 +17,8 @@
 package com.itfsw.redis.mq;
 
 import com.itfsw.redis.mq.redis.RedisOperations;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * ---------------------------------------------------------------------------
@@ -26,7 +28,8 @@ import com.itfsw.redis.mq.redis.RedisOperations;
  * @time:2017/11/16 10:53
  * ---------------------------------------------------------------------------
  */
-public interface MessageChannel<T> {
+public interface MessageChannel<T> extends InitializingBean, DisposableBean {
+
     /**
      * 频道
      * @return

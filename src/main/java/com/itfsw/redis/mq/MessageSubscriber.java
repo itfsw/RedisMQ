@@ -29,9 +29,9 @@ import java.util.List;
  * @time:2017/11/13 11:03
  * ---------------------------------------------------------------------------
  */
-public interface MessageSubscriber<T> extends InitializingBean, DisposableBean{
+public interface MessageSubscriber<T> extends InitializingBean, DisposableBean {
     /**
-     * 订阅的频道
+     * 订阅的频道（不安全）
      * @return
      */
     List<MessageChannel> getChannels();

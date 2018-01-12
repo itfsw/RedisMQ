@@ -16,6 +16,9 @@
 
 package com.itfsw.redis.mq;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
 /**
  * ---------------------------------------------------------------------------
  * Publisher
@@ -24,7 +27,7 @@ package com.itfsw.redis.mq;
  * @time:2017/11/13 11:03
  * ---------------------------------------------------------------------------
  */
-public interface MessagePublisher<T> {
+public interface MessagePublisher<T> extends InitializingBean, DisposableBean {
     /**
      * 发送消息
      * @param message

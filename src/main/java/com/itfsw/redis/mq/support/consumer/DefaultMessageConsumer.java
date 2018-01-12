@@ -82,29 +82,42 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
 
         // 消息处理
         this.messageHandlerThread = new MultiThreadingStrategy(threads);
-        this.messageHandlerThread.start(queue.getQueueName(), () -> {
-            MessageWrapper<T> wrapper = null;
-            try {
-                wrapper = queue.poll();
-                if (wrapper != null) {
-                    long time = queue.redisOps().time();
-                    // 1. 判断过期
-                    if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
-                        expiredHandler.onMessage(queue, wrapper);
+        this.messageHandlerThread.start(queue.getQueueName(), new Runnable() {
+            private final static short MAX_MILLIS_FOR_EMPTY_WHILE = 350;  // 线程空转最大时长 毫秒
+            private final static short MIN_MILLIS_FOR_EMPTY_WHILE = 50;  // 线程空转最小时长 毫秒
+            private final static short INCREMENTS_MILLIS_FOR_EMPTY_WHILE = 2;  // 线程空转步长 毫秒
+
+            private short waitTime = MIN_MILLIS_FOR_EMPTY_WHILE;    // 间隔
+
+            @Override
+            public void run() {
+                MessageWrapper<T> wrapper = null;
+                try {
+                    wrapper = queue.poll();
+                    if (wrapper != null) {
+                        waitTime = MIN_MILLIS_FOR_EMPTY_WHILE;
+                        long time = queue.redisOps().time();
+                        // 1. 判断过期
+                        if (wrapper.getExpires() > -1 && wrapper.getCreateTime() + wrapper.getExpires() > time) {
+                            expiredHandler.onMessage(queue, wrapper);
+                        } else {
+                            // 2. 执行
+                            messageListener.onMessage(wrapper);
+                            // 3. 执行成功
+                            successHandler.onMessage(queue, wrapper);
+                        }
                     } else {
-                        // 2. 执行
-                        messageListener.onMessage(wrapper);
-                        // 3. 执行成功
-                        successHandler.onMessage(queue, wrapper);
+                        // 减少没有任务时cpu,redis,网络的空转消耗
+                        if (waitTime < MAX_MILLIS_FOR_EMPTY_WHILE){
+                            waitTime += INCREMENTS_MILLIS_FOR_EMPTY_WHILE;
+                        }
+                        Thread.sleep(waitTime);
                     }
-                } else {
-                    // 减少没有任务时cpu,redis,网络的空转消耗
-                    Thread.sleep(100);
+                } catch (MessageHandlerException e) {
+                    failureHandler.onMessageHandlerException(queue, wrapper, e);
+                } catch (Throwable e){
+                    failureHandler.onMessageProgressException(queue, wrapper, e);
                 }
-            } catch (MessageHandlerException e) {
-                failureHandler.onMessageHandlerException(queue, wrapper, e);
-            } catch (Throwable e){
-                failureHandler.onMessageProgressException(queue, wrapper, e);
             }
         });
     }

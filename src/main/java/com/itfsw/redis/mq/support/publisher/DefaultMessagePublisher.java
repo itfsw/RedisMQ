@@ -57,6 +57,16 @@ public class DefaultMessagePublisher<T> implements MessagePublisher<T> {
         return channel;
     }
 
+    @Override
+    public void destroy() throws Exception {
+        // 注销channel
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // 注册channel
+    }
+
     private class DefaultMessageSender<T> extends AbstractMessageSender<T> {
 
         /**
