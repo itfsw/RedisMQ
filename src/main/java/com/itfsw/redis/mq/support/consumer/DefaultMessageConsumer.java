@@ -29,8 +29,6 @@ import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageExpiredHa
 import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageFailureHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.DefaultQueueMessageSuccessHandler;
 import com.itfsw.redis.mq.support.consumer.strategy.MultiThreadingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * ---------------------------------------------------------------------------
  */
 public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
-    private static final Logger log = LoggerFactory.getLogger(MultiThreadingStrategy.class);
 
     private MessageQueue<T> queue;  // 消息队列
     private MessageListener<T> messageListener; // 消息处理
@@ -64,6 +61,16 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
     }
 
     /**
+     * 构造函数
+     * @param queue
+     * @param threadsNum
+     */
+    public DefaultMessageConsumer(MessageQueue<T> queue, int threadsNum) {
+        this.queue = queue;
+        this.threadsNum = threadsNum;
+    }
+
+    /**
      * 获取队列
      * @return
      */
@@ -74,14 +81,12 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
 
     /**
      * 开启consumer
-     * @param threads
      */
     @Override
-    public void startConsumer(int threads) {
-        this.threadsNum = threads;
+    public void startConsumer() {
 
         // 消息处理
-        this.messageHandlerThread = new MultiThreadingStrategy(threads);
+        this.messageHandlerThread = new MultiThreadingStrategy(this.threadsNum);
         this.messageHandlerThread.start(queue.getQueueName(), new Runnable() {
             private final static short MAX_MILLIS_FOR_EMPTY_WHILE = 350;  // 线程空转最大时长 毫秒
             private final static short MIN_MILLIS_FOR_EMPTY_WHILE = 50;  // 线程空转最小时长 毫秒
@@ -193,7 +198,7 @@ public class DefaultMessageConsumer<T> implements MessageConsumer<T> {
 
         // 开启线程
         if (messageHandlerThread == null) {
-            startConsumer(1);
+            startConsumer();
         }
     }
 }

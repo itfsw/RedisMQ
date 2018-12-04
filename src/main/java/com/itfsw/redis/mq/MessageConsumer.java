@@ -45,9 +45,8 @@ public interface MessageConsumer<T> extends InitializingBean, DisposableBean{
 
     /**
      * 开启consumer
-     * @param threads
      */
-    void startConsumer(int threads);
+    void startConsumer();
 
     /**
      * 结束consumer
